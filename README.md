@@ -1,5 +1,4 @@
 # IoT-Project — Water Filter Monitoring System
-
 IoT system for real-time monitoring of a water filter, simulating pressure and flow data with an ESP32 and visualising it through a full IoT stack: MQTT → Node-RED → InfluxDB → Grafana.
 
 ---
@@ -36,7 +35,6 @@ Grafana (dashboard & alerts)
 
 <img width="730" height="625" alt="image" src="https://github.com/user-attachments/assets/8aab54cd-56db-481a-b793-cba991960b44" />
 
-
 ---
 
 ## Repository Structure
@@ -44,15 +42,11 @@ Grafana (dashboard & alerts)
 ```
 IoT-Project/
 ├── README.md
-├── wiring_diagram.png          # Hardware connections (Wokwi)
-├── firmware/
-│   └── iot_project.ino         # ESP32 firmware (Arduino)
-├── node-red/
-│   └── flow.json               # Node-RED complete flow
-├── influxdb/
-│   └── query_filtro_agua.flux  # Flux query used in Grafana
-└── grafana/
-    └── dashboard.json          # Grafana dashboard export
+├── wiring_diagram.png                   # Hardware connections (Wokwi)
+├── code_water_flow_IoT_project.ino      # ESP32 firmware (Arduino)
+├── flows_node-red.json                  # Node-RED complete flow
+├── query_filtro_agua.flux               # Flux query used in Grafana
+└── grafana_dashboard.json              # Grafana dashboard export
 ```
 
 ---
@@ -86,7 +80,7 @@ IoT-Project/
 3. When `dp_kpa` exceeds the saturation threshold, the LED turns ON and `estado` is set to `SATURADO`.
 4. All values are published via MQTT to the public broker.
 5. Node-RED subscribes to the topic, parses the payload, and writes to InfluxDB.
-6. Grafana queries InfluxDB using the Flux query in `influxdb/query_filtro_agua.flux` and displays live panels.
+6. Grafana queries InfluxDB using the Flux query in `query_filtro_agua.flux` and displays live panels.
 
 ---
 
@@ -94,7 +88,7 @@ IoT-Project/
 
 ### ESP32 Firmware
 
-See [`firmware/iot_project.ino`](firmware/iot_project.ino).
+See [`code_water_flow_IoT_project.ino`](code_water_flow_IoT_project.ino).
 
 Dependencies (Arduino IDE / PlatformIO):
 - `PubSubClient` — MQTT client
@@ -102,15 +96,15 @@ Dependencies (Arduino IDE / PlatformIO):
 
 ### Node-RED
 
-Import [`node-red/flow.json`](node-red/flow.json) via **Menu → Import → Clipboard**.
+Import [`flows_node-red.json`](flows_node-red.json) via **Menu → Import → Clipboard**.
 
 ### InfluxDB
 
-Create a bucket named `IoT_LAB`. The Flux query in [`influxdb/query_filtro_agua.flux`](influxdb/query_filtro_agua.flux) can be used directly in the Grafana data source panel.
+Create a bucket named `IoT_LAB`. The Flux query in [`query_filtro_agua.flux`](query_filtro_agua.flux) can be used directly in the Grafana data source panel.
 
 ### Grafana
 
-Import [`grafana/dashboard.json`](grafana/dashboard.json) via **Dashboards → Import → Upload JSON file**.
+Import [`grafana_dashboard.json`](grafana_dashboard.json) via **Dashboards → Import → Upload JSON file**.
 
 ---
 
