@@ -1,0 +1,423 @@
+[
+    {
+        "id": "b6b0ec53c1efc6be",
+        "type": "tab",
+        "label": "projeto IoT",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "mqtt_in_filtro",
+        "type": "mqtt in",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Subscrever dados filtro",
+        "topic": "IPB/IoT/a52965/filtro/dados",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "c49410b8a1908fb6",
+        "inputs": 0,
+        "x": 620,
+        "y": 140,
+        "wires": [
+            [
+                "8654144f91b8787e",
+                "c8b3b3b3d242e0e0"
+            ]
+        ]
+    },
+    {
+        "id": "separar_campos",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Separar campos",
+        "func": "if (!msg.payload || typeof msg.payload !== 'object') return null;\nconst d = msg.payload;\nreturn [\n  {payload: Number(d.p1_kpa)},\n  {payload: Number(d.p2_kpa)},\n  {payload: Number(d.dp_kpa)},\n  {payload: Number(d.flow_pct)},\n  {payload: String(d.estado)},\n  {payload: Boolean(d.saturado)}\n];",
+        "outputs": 6,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 140,
+        "wires": [
+            [
+                "gauge_p1"
+            ],
+            [
+                "gauge_p2"
+            ],
+            [
+                "gauge_dp"
+            ],
+            [
+                "gauge_flow"
+            ],
+            [],
+            [
+                "led_alerta"
+            ]
+        ]
+    },
+    {
+        "id": "gauge_p1",
+        "type": "ui_gauge",
+        "z": "b6b0ec53c1efc6be",
+        "name": "P1",
+        "group": "group_filtro",
+        "order": 2,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "P1 — Pressão entrada",
+        "label": "kPa",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 5,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1270,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "gauge_p2",
+        "type": "ui_gauge",
+        "z": "b6b0ec53c1efc6be",
+        "name": "P2",
+        "group": "group_filtro",
+        "order": 4,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "P2 — Pressão saída",
+        "label": "kPa",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 5,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1270,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "gauge_dp",
+        "type": "ui_gauge",
+        "z": "b6b0ec53c1efc6be",
+        "name": "ΔP",
+        "group": "group_filtro",
+        "order": 1,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "ΔP — Pressão diferencial",
+        "label": "kPa",
+        "format": "{{value}}",
+        "min": -5,
+        "max": 5,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1270,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "gauge_flow",
+        "type": "ui_gauge",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Caudal",
+        "group": "group_filtro",
+        "order": 5,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "Caudal",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 100,
+        "colors": [
+            "#ca3838",
+            "#e6e600",
+            "#00b500"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1270,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "led_alerta",
+        "type": "ui_led",
+        "z": "b6b0ec53c1efc6be",
+        "order": 7,
+        "group": "group_filtro",
+        "width": 4,
+        "height": 1,
+        "label": "Alerta saturação",
+        "colorForValue": [
+            {
+                "color": "#00b500",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ff0000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Alerta saturação",
+        "x": 1280,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "slider_dp",
+        "type": "ui_slider",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Threshold ΔP",
+        "label": "Limiar ΔP (kPa)",
+        "group": "group_filtro",
+        "order": 6,
+        "width": 6,
+        "height": 3,
+        "min": 0,
+        "max": 5,
+        "step": 0.1,
+        "x": 840,
+        "y": 360,
+        "wires": [
+            [
+                "build_thresh"
+            ]
+        ]
+    },
+    {
+        "id": "slider_q",
+        "type": "ui_slider",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Threshold Q",
+        "label": "Caudal mínimo (%)",
+        "group": "group_filtro",
+        "order": 3,
+        "width": 6,
+        "height": 4,
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "x": 840,
+        "y": 420,
+        "wires": [
+            [
+                "build_thresh"
+            ]
+        ]
+    },
+    {
+        "id": "build_thresh",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Montar threshold",
+        "func": "flow.set(msg.topic === 'dp' ? 'dp_threshold' : 'q_min', msg.payload);\nvar dp = flow.get('dp_threshold') || 1.5;\nvar qm = flow.get('q_min') || 20.0;\nmsg.payload = JSON.stringify({dp_threshold: dp, q_min: qm});\nreturn msg;",
+        "outputs": 1,
+        "x": 1060,
+        "y": 390,
+        "wires": [
+            [
+                "mqtt_out_thresh",
+                "influx_debug"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_out_thresh",
+        "type": "mqtt out",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Publicar threshold",
+        "topic": "IPB/IoT/a52965/filtro/threshold",
+        "qos": "0",
+        "broker": "c49410b8a1908fb6",
+        "x": 1270,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "d1aa7a70aa78bbf6",
+        "type": "debug",
+        "z": "b6b0ec53c1efc6be",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "8654144f91b8787e",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Decrypt",
+        "func": "const key = Buffer.from('IPB_IoT_a52965!!', 'utf8');\nconst iv = Buffer.from('000102030405060708090A0B0C0D0E0F', 'hex');\n\ntry {\n    const encrypted = Buffer.from(msg.payload, 'base64');\n    const decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);\n    decipher.setAutoPadding(true);\n    let decrypted = decipher.update(encrypted);\n    decrypted = Buffer.concat([decrypted, decipher.final()]);\n    msg.payload = JSON.parse(decrypted.toString('utf8').trim());\n    return msg;\n} catch (e) {\n    node.error(\"Erro decifração: \" + e.message);\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 820,
+        "y": 140,
+        "wires": [
+            [
+                "separar_campos",
+                "d1aa7a70aa78bbf6",
+                "influx_format"
+            ]
+        ]
+    },
+    {
+        "id": "c8b3b3b3d242e0e0",
+        "type": "debug",
+        "z": "b6b0ec53c1efc6be",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "influx_format",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Formatar Line Protocol",
+        "func": "var d = msg.payload;\n\nif (!d || typeof d !== 'object') return null;\n\nvar line = 'filtro_agua,estado=' + d.estado +\n  ' p1_kpa=' + d.p1_kpa +\n  ',p2_kpa=' + d.p2_kpa +\n  ',dp_kpa=' + d.dp_kpa +\n  ',flow_pct=' + d.flow_pct +\n  ',saturado=' + (d.saturado ? 1 : 0);\n\nmsg.payload = line;\nmsg.method = 'POST';\nmsg.url = 'http://localhost:8086/api/v2/write?org=IPB_IoT_Mauro&bucket=IoT_LAB&precision=s';\nmsg.headers = {\n  'Authorization': 'Token MRCwcjp3jOR5vYPn6tkEU4lqhkUnByZk2qAQMJOzWBCLpWuIujyPVdRWrqrmaCtFs2iadW_9dGqIZMVILtGqHQ==',\n  'Content-Type': 'text/plain'\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 300,
+        "wires": [
+            [
+                "influx_http"
+            ]
+        ]
+    },
+    {
+        "id": "influx_http",
+        "type": "http request",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Escrever InfluxDB",
+        "method": "use",
+        "ret": "txt",
+        "url": "",
+        "x": 1290,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "influx_debug",
+        "type": "debug",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Resposta InfluxDB",
+        "active": false,
+        "x": 1270,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "9d2583dc6626c4b2",
+        "type": "ui_spacer",
+        "z": "b6b0ec53c1efc6be",
+        "name": "spacer",
+        "group": "group_filtro",
+        "order": 8,
+        "width": 2,
+        "height": 1
+    },
+    {
+        "id": "c49410b8a1908fb6",
+        "type": "mqtt-broker",
+        "name": "broker.mqtt-dashboard.com",
+        "broker": "broker.mqtt-dashboard.com",
+        "port": 1883,
+        "clientid": "NodeRED_a52965",
+        "usetls": false,
+        "keepalive": 60,
+        "cleansession": true
+    },
+    {
+        "id": "group_filtro",
+        "type": "ui_group",
+        "name": "Monitorização do Filtro",
+        "tab": "tab_filtro",
+        "order": 1,
+        "disp": true,
+        "width": 18,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "tab_filtro",
+        "type": "ui_tab",
+        "name": "Filtro de Água",
+        "icon": "dashboard"
+    },
+    {
+        "id": "53e9115a6bf2e804",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-contrib-ui-led": "0.4.11"
+        }
+    }
+]
