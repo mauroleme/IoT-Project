@@ -34,6 +34,7 @@ Grafana (dashboard & alerts)
 
 ### Wiring Diagram
 
+<img width="730" height="625" alt="image" src="https://github.com/user-attachments/assets/8aab54cd-56db-481a-b793-cba991960b44" />
 
 
 ---
