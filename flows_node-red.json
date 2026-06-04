@@ -206,13 +206,19 @@
         "z": "b6b0ec53c1efc6be",
         "name": "Threshold ΔP",
         "label": "Limiar ΔP (kPa)",
+        "tooltip": "",
         "group": "group_filtro",
         "order": 6,
         "width": 6,
         "height": 3,
+        "passthru": true,
+        "outs": "all",
+        "topic": "",
+        "topicType": "str",
         "min": 0,
         "max": 5,
         "step": 0.1,
+        "className": "",
         "x": 840,
         "y": 360,
         "wires": [
@@ -309,7 +315,8 @@
             [
                 "separar_campos",
                 "d1aa7a70aa78bbf6",
-                "influx_format"
+                "influx_format",
+                "6e33f78ddb2a3840"
             ]
         ]
     },
@@ -318,7 +325,7 @@
         "type": "debug",
         "z": "b6b0ec53c1efc6be",
         "name": "debug 3",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -368,19 +375,194 @@
         "type": "debug",
         "z": "b6b0ec53c1efc6be",
         "name": "Resposta InfluxDB",
-        "active": false,
+        "active": true,
         "x": 1270,
         "y": 360,
         "wires": []
     },
     {
-        "id": "9d2583dc6626c4b2",
+        "id": "6e33f78ddb2a3840",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Guardar último valor",
+        "func": "var d = msg.payload;\nif (d && typeof d === 'object' && d.p1_kpa !== undefined) {\n    flow.set('ultimo_valor', {\n        p1_kpa:   d.p1_kpa,\n        p2_kpa:   d.p2_kpa,\n        dp_kpa:   d.dp_kpa,\n        flow_pct: d.flow_pct,\n        estado:   d.estado,\n        ts:       new Date().toLocaleTimeString('pt-PT')\n    });\n}\nreturn msg;",
+        "outputs": 1,
+        "x": 1040,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "03ccf0dce4b481f8",
+        "type": "ui_microphone",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Microfone",
+        "group": "group_voz",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "mode": "recog",
+        "x": 600,
+        "y": 600,
+        "wires": [
+            [
+                "779ef935dab51918",
+                "add51a76227462f7"
+            ]
+        ]
+    },
+    {
+        "id": "779ef935dab51918",
+        "type": "debug",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Texto reconhecido",
+        "active": true,
+        "x": 820,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "add51a76227462f7",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Interpretar Pergunta",
+        "func": "const texto = (msg.payload || '').toLowerCase().trim();\nvar d = flow.get('ultimo_valor');\n\nif (!d) {\n    msg.payload = 'Sistema não disponível no momento. Nenhum dado recebido ainda.';\n    return msg;\n}\n\nvar resposta;\n\nif (texto.includes('estado') || texto.includes('saturad')) {\n    resposta = 'O estado do filtro é ' + d.estado + '. Última leitura às ' + d.ts + '.';\n\n} else if (texto.includes('pressão') || texto.includes('pressao') || texto.includes('entrada') || texto.includes('antes') || texto.includes('saída') || texto.includes('saida')) {\n    resposta = 'A pressão antes do filtro é ' + d.p1_kpa + ' quilopascal' +\n        ', depois do filtro é ' + d.p2_kpa + ' quilopascal' +\n        ', e a pressão diferencial é ' + d.dp_kpa + ' quilopascal.';\n\n} else if (texto.includes('caudal') || texto.includes('fluxo') || texto.includes('vazão') || texto.includes('vazao')) {\n    resposta = 'O caudal está em ' + d.flow_pct + ' porcento.';\n\n} else if (\n    texto.includes('relat') ||\n    texto.includes('resumo') ||\n    texto.includes('tudo') ||\n    texto.includes('completo') ||\n    texto.includes('sensor') ||\n    texto.includes('valores') ||\n    texto.includes('dados') ||\n    texto.includes('filtro')\n) {\n    resposta = 'Filtro ' + d.estado +\n        '. Pressões ' + d.p1_kpa + ' e ' + d.p2_kpa + ' quilopascal' +\n        ', diferencial ' + d.dp_kpa +\n        '. Caudal ' + d.flow_pct + ' porcento.';\n\n} else {\n    resposta = 'Não entendi a pergunta. Pode perguntar sobre o estado do filtro, as pressões, o caudal, ou pedir um relatório completo.';\n}\n\nmsg.payload = resposta;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 600,
+        "wires": [
+            [
+                "6c88b2ad9494df87",
+                "04f4fcb1a4b767df"
+            ]
+        ]
+    },
+    {
+        "id": "6c88b2ad9494df87",
+        "type": "ui_text",
+        "z": "b6b0ec53c1efc6be",
+        "group": "group_voz",
+        "order": 5,
+        "width": 6,
+        "height": 4,
+        "name": "Resposta texto",
+        "label": "Resposta do assistente",
+        "format": "{{msg.payload}}",
+        "x": 1040,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "04f4fcb1a4b767df",
+        "type": "function",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Montar URL TTS",
+        "func": "const texto = encodeURIComponent(msg.payload);\nmsg.url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${texto}&tl=pt&client=tw-ob`;\nmsg.headers = { 'User-Agent': 'Mozilla/5.0' };\nreturn msg;",
+        "outputs": 1,
+        "x": 1040,
+        "y": 640,
+        "wires": [
+            [
+                "ae614c5be7a5644b"
+            ]
+        ]
+    },
+    {
+        "id": "ae614c5be7a5644b",
+        "type": "http request",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Download MP3 TTS",
+        "method": "GET",
+        "ret": "bin",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1180,
+        "y": 700,
+        "wires": [
+            [
+                "e7d384dc27d981e0",
+                "81491cba133b207f"
+            ]
+        ]
+    },
+    {
+        "id": "e7d384dc27d981e0",
+        "type": "ui_audio",
+        "z": "b6b0ec53c1efc6be",
+        "name": "Audio Out",
+        "group": "group_voz",
+        "always": true,
+        "x": 1360,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "81491cba133b207f",
+        "type": "debug",
+        "z": "b6b0ec53c1efc6be",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1400,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "727656852bdeed47",
         "type": "ui_spacer",
         "z": "b6b0ec53c1efc6be",
         "name": "spacer",
         "group": "group_filtro",
         "order": 8,
         "width": 2,
+        "height": 1
+    },
+    {
+        "id": "3d0e7f775cc50ff5",
+        "type": "ui_spacer",
+        "z": "b6b0ec53c1efc6be",
+        "name": "spacer",
+        "group": "group_voz",
+        "order": 2,
+        "width": 6,
+        "height": 1
+    },
+    {
+        "id": "816663161dace575",
+        "type": "ui_spacer",
+        "z": "b6b0ec53c1efc6be",
+        "name": "spacer",
+        "group": "group_voz",
+        "order": 3,
+        "width": 6,
+        "height": 1
+    },
+    {
+        "id": "4da92148f8571992",
+        "type": "ui_spacer",
+        "z": "b6b0ec53c1efc6be",
+        "name": "spacer",
+        "group": "group_voz",
+        "order": 4,
+        "width": 6,
         "height": 1
     },
     {
@@ -406,18 +588,28 @@
         "className": ""
     },
     {
+        "id": "group_voz",
+        "type": "ui_group",
+        "name": "Assistente de Voz",
+        "tab": "tab_filtro",
+        "order": 3,
+        "disp": true,
+        "width": "6"
+    },
+    {
         "id": "tab_filtro",
         "type": "ui_tab",
         "name": "Filtro de Água",
         "icon": "dashboard"
     },
     {
-        "id": "53e9115a6bf2e804",
+        "id": "34dbad8b832f3016",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-contrib-ui-led": "0.4.11"
+            "node-red-contrib-ui-led": "0.4.11",
+            "node-red-node-ui-microphone": "0.3.1"
         }
     }
 ]
